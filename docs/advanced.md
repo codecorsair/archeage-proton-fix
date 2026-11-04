@@ -2,6 +2,44 @@
 
 For the guided setup, start with the [main README](../README.md). All commands below run from the repository root, not from this `docs/` folder.
 
+## Standalone setup and dependency checks
+
+`setup.sh` is a POSIX-shell bootstrap. A standalone copy downloads the fixed GitHub repository archive and its checked-in `bin/tzcompat.dll` and `bin/probe.exe`; it does not require Git or fetch a separate release. An in-repository copy reuses its checkout.
+
+```sh
+sh setup.sh --check           # Installation and source-build groups
+sh setup.sh --check --install # Installation requirements only
+sh setup.sh --check --build   # Build requirements only
+```
+
+Check mode never downloads the repository or installs packages. It may create temporary compiler/Python probes and removes its own scratch files. Exit 0 means the requested checks passed; a nonzero result names missing or unusable tools. A compiler failure is separate from installation readiness.
+
+Default `sh setup.sh` checks prebuilt-install prerequisites, offers a displayed package-manager command with default-no consent when appropriate, and hands off to `install.py`. System package installation may use `sudo`; the Python installer never runs as root. Packages/repositories vary by distribution and release, so an unsuccessful package command stops rather than adding repositories or retrying unrelated managers.
+
+For a standalone script, choose a different **new** download directory with:
+
+```sh
+sh setup.sh --directory "$HOME/Downloads/archeage-proton-fix-new"
+```
+
+The default is `~/.local/share/archeage-proton-fix-setup`. Downloaded artifacts are checked against their archive's `SHA256SUMS`, which detects mismatches, not a compromised source repository. HTTPS plus trusting this repository is the download trust model; the checksums are not signatures. The script does not rewrite shell profiles, stop Steam, or install compiler packages just to use the prebuilt DLL.
+
+The original game/runtime validation was on CachyOS with native Steam. Distro-family dependency support and simulated package-manager tests are not equivalent to testing Steam or the game on those systems. Alpine/musl dependency detection in particular does not establish Steam runtime compatibility.
+
+### Distribution caveats
+
+Package hints are based on official metadata, not on installations performed on each distro:
+
+| Family | Notes |
+| --- | --- |
+| Debian / Ubuntu | Python helpers normally use `python3-venv` and `python3-pip`; source tools are `clang`, `llvm`, and `lld`. See [LLVM's distro packages](https://apt.llvm.org/). |
+| Fedora / RHEL | Fedora has the usual `clang`, `llvm`, and `lld` packages. RHEL availability depends on enabled repositories/subscriptions; setup does not add EPEL or other repositories. See [Fedora LLVM](https://packages.fedoraproject.org/pkgs/llvm/) and [EPEL prerequisites](https://docs.fedoraproject.org/en-US/epel/getting-started/). |
+| Arch / CachyOS | Python packages use `python` and `python-pip`; LLVM tools use `clang`, `llvm`, and `lld`. See [Arch LLVM](https://archlinux.org/packages/extra/x86_64/llvm/). |
+| openSUSE | Python defaults and package names vary significantly. Leap 15.6's Python 3.6 is too old; installing an arbitrary newer interpreter does not safely change `python3`. Tumbleweed currently packages a newer versioned Python. Do not replace the system Python to satisfy setup. |
+| Alpine | LLVM packages are versioned by branch, such as `clang20`/`llvm20`/`lld20` on 3.22. Command providers and names vary; see [Alpine LLVM metadata](https://pkgs.alpinelinux.org/package/v3.22/main/x86_64/llvm20). GNU coreutils is required because BusyBox `cp` is not a substitute for `cp --reflink=auto`. |
+
+The Python `pefile` dependency stays in the installer's local venv when needed; system `python3-pefile` packages are not required. The checker tests what is actually executable on `PATH`, rather than treating a package-manager name as proof that it works.
+
 ## Installer options
 
 The guided installer uses plain terminal prompts and needs no extra UI libraries. It auto-detects native Steam, game libraries, and Proton runtimes with the tested directory layout.
@@ -141,11 +179,26 @@ Launch the game. Initial shader compilation can take time. Getting past the DLL 
 
 ## Build from source
 
-Requirements: Bash, Clang with the x86-64 Windows target, `lld-link`, and `llvm-dlltool`. Python 3 and the pinned `pefile` dependency are needed separately for patching/testing the Wine DLL. No Windows SDK, MSVC installation, or C runtime library is linked into the shim or probe.
+These are the actual source-build tools, separate from installation prerequisites:
+
+| Tool | Purpose |
+| --- | --- |
+| Bash | Runs `build.sh` with its existing shell semantics. |
+| GNU coreutils | Supplies `realpath`, `mkdir`, and `dirname`; setup/install also need `cp --reflink=auto` and `sha256sum`. |
+| `clang` | Compiles C into Windows x86-64 COFF objects with `--target=x86_64-pc-windows-msvc`. |
+| `llvm-dlltool` | Creates a Kernel32 import library from the project's `.def` declarations. |
+| `lld-link` | Links Windows DLL/EXE output without an external C runtime. |
+
+Run the checker, then build into a new directory:
 
 ```bash
+sh setup.sh --check --build
 bash build.sh build/from-source
 ```
+
+The checker exercises a Windows-target compile/import-library/link sequence. Tool names must be available exactly as above because those are what `build.sh` invokes. If your distro installs versioned commands only, expose the matching LLVM toolchain's `bin` directory on `PATH` or follow the checker's package hints. Merely finding `clang` is insufficient if its Windows target or COFF linker support is missing.
+
+Python **3.9+**, `venv`/pip (unless the helper already exists), and the pinned `pefile` dependency are needed separately for installing/patching/testing the Wine DLL, not for compiling these C files. Downloading setup needs curl or wget with HTTPS support, tar, and gzip. No Windows SDK, MSVC, GCC, CMake, MinGW SDK, or external C runtime is required.
 
 The output directory must be new. This produces `tzcompat.dll`, `probe.exe`, and intermediate import/object files without modifying any installed runtime or prefix. To use your build, substitute `build/from-source/tzcompat.dll` and `build/from-source/probe.exe` for the `bin/` paths above.
 
@@ -176,6 +229,8 @@ Tests check existing named/ordinal exports, forwarders, section bytes, COFF symb
 - `tzcompat.c`, `timezone.h`: original compatibility implementation and ABI declarations.
 - `add_forwarder.py`: preserves old exports while adding a PE forwarding export.
 - `probe.c`, `test_patch.py`: native behavior and PE-preservation tests.
+- `setup.sh`: checks requirements or downloads/prepares the prebuilt-install route with explicit consent.
+- `test_setup.py`: dependency/bootstrap failure and safety tests using isolated command stubs.
 - `build.sh`: builds the shim/probe without changing an installation.
 - `bin/`, `SHA256SUMS`: prebuilt x64 artifacts and integrity checks.
 - `compatibilitytool.vdf`: distinct Steam compatibility-tool registration.
