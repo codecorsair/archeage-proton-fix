@@ -1,9 +1,9 @@
 # Portable setup workflow record
 
 ## Status
-- Status: active
-- Current phase: corrected product independently approved and final checks passed; ready to publish.
-- Next safe action: integrate locally, push the authorized update, and verify the public script/archive.
+- Status: complete
+- Current phase: published and verified public script, checks and archive handoff.
+- Next safe action: use the README's saved-script workflow; future updates follow normal review.
 
 ## Request and scope
 - Request: document build tools, check build and install dependencies across major Linux families, and provide a standalone shell script that downloads the repo/assets and starts guided installation.
@@ -11,10 +11,10 @@
 - Out of scope: silent package installation, sudo for the whole installer, changing the active game, automatic game/Steam shutdown, new Python/UI dependencies, distro-wide runtime guarantees.
 
 ## Git identity
-- Source branch: main, clean, fetched origin.
+- Source branch: main, clean; origin is the public codecorsair/archeage-proton-fix repository.
 - Base commit: bda9637a2133d64afa18ec9cdc97606e3ae86d9f.
-- Feature branch: feature/setup.
-- Worktree: .worktrees/setup, rebased onto origin/main before product changes.
+- Feature branch: feature/setup was fast-forwarded into main and deleted.
+- Worktree: .worktrees/setup was synchronized, verified clean/reachable, and removed after integration.
 - Omitted source changes: none.
 
 ## Acceptance criteria
@@ -26,7 +26,7 @@
 - [x] Local-repo setup reuses its checkout; verifies artifact checksums before launching existing non-root guided installer.
 - [x] Beginner README and advanced tools table explain prebuilt-vs-build requirements and tested-vs-supported scope.
 - [x] Focused failure/safety tests, final suite/build checks, and fresh independent review passed.
-- [ ] Authorized publication and public artifact verification complete.
+- [x] Authorized publication and public artifact verification complete.
 
 ## Approved implementation plan and gates
 - Plan/specification source: user conversation and structured answers.
@@ -53,6 +53,8 @@
 | Artifact integrity | sha256sum -c SHA256SUMS | original packaged binaries unchanged | 0 | both pass |
 | Safety regressions | native distro selection, newline TMPDIR cleanup, early collision, approved/declined commands | temporary fixtures only | 0 | foreign managers not chosen; unrelated files preserved; no actual package manager or sudo runs |
 | Real download | setup-real-download and corrected setup-real-download-final background tasks | genuine GitHub archive; Python wrapper permits only install.py --help at handoff | 0 | both terminal results inspected: real artifacts verified and E2E_HANDOFF_HELP_ONLY confirmed; no installation or game changes |
+| Published flow | setup-public-flow background task | raw main setup.sh compared with reviewed local file; --check; actual published archive downloaded and checksummed; installer restricted to --help | 0 | terminal result inspected; both groups PASS, both real artifact hashes OK, PUBLISHED_E2E_HELP_ONLY confirmed |
+| Published blob | GitHub contents API and local Git object identity | setup.sh on public main | 0 | matching blob 7a597a94f1e65d66133911c1464d875e0685f144, size 21508 bytes |
 
 ## Review
 - Base and product HEAD: bda9637a2133d64afa18ec9cdc97606e3ae86d9f to 52e3b862bdc29daa4a67271985b610c4baec9230.
@@ -69,12 +71,13 @@
 
 ## Integration and rollback
 - Synchronization and re-verification: fetched and rebased origin/main after fresh review; product identity unchanged; final suite/checks/rebuild passed.
-- Fast-forward result: pending
-- Product and evidence commits: pending
-- Reachability and cleanup: remove only clean integrated workflow worktree; preserve active game and original workaround.
+- Fast-forward result: main fast-forwarded to b45ad9f6ee34101e96c5f60a925c0a4a7b604833 and pushed; remote main equality verified.
+- Product and evidence commits: 6ae77b3 implementation, 52e3b86 scratch-path correction, b45ad9f approval/final-check evidence; record-only completion follows.
+- Reachability and cleanup: all code/evidence reachable from main; clean worktree/feature branch removed. Invalid-review generated output retained in .git/workflow-evidence/setup-relative-tmp-6ae77b3. Active game and original workaround preserved.
+- Public URL: https://github.com/codecorsair/archeage-proton-fix. Public raw main script and archive flow verified after push. Complete README opened in native artifact viewer.
 - Rollback strategy: code update is locally reversible; bootstrap never changes shared Proton and delegates prefix changes to the existing backed-up installer.
 
 ## Checkpoints and blockers
-- Latest saved checkpoint and last committed checkpoint: initial plan, base bda9637.
+- Latest saved checkpoint and last committed checkpoint: published b45ad9f includes reviewed code; this completion record captures public verification.
 - Blockers: none.
-- Exact next safe action: integrate reviewed product and evidence-only record, push main, verify raw public script/hash and real archive handoff with installation restricted to --help.
+- Exact next safe action: commit/push this record-only completion update, confirm remote equality, and report the public setup command.
