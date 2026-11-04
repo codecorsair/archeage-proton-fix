@@ -223,6 +223,24 @@ class SetupTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertEqual(result.stdout, '')
 
+    def test_relative_tmpdir_from_another_cwd_does_not_write_checkout(self):
+        checkout = self.root / 'source'
+        checkout.mkdir()
+        for name in ('setup.sh', 'build.sh', 'tzcompat.c', 'timezone.h', 'probe.c'):
+            shutil.copy2(ROOT / name, checkout / name)
+        caller = self.root / 'caller'
+        caller.mkdir()
+        scratch = caller / 'relative-tmp'
+        scratch.mkdir()
+        sentinel = scratch / 'keep'
+        sentinel.write_text('caller-owned')
+        result = subprocess.run(['/bin/sh', str(checkout / 'setup.sh'), '--check', '--build'], cwd=caller,
+                                env={**self.env, 'TMPDIR': 'relative-tmp'}, capture_output=True, text=True, timeout=30)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertFalse((checkout / 'relative-tmp').exists())
+        self.assertEqual(sentinel.read_text(), 'caller-owned')
+        self.assertEqual(list(scratch.iterdir()), [sentinel])
+
     def test_probe_cleanup_preserves_other_paths_with_newline_tmpdir(self):
         keep = self.root / 'keep'
         keep.mkdir()

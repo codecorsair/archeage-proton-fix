@@ -42,6 +42,12 @@ command_exists() {
     command -v "$1" >/dev/null 2>&1
 }
 
+make_probe_directory() {
+    # build.sh changes directory, so a relative TMPDIR must be resolved first.
+    probe_parent=$(CDPATH= cd -- "${TMPDIR:-/tmp}" 2>/dev/null && pwd -P) || return 1
+    mktemp -d "$probe_parent/$1.XXXXXX"
+}
+
 mark_install_missing() {
     INSTALL_MISSING=1
     printf '  [missing] %s\n' "$1"
@@ -79,7 +85,7 @@ check_python() {
         printf '  [ok] Python pefile module\n'
         return
     fi
-    venv_probe=$(mktemp -d "${TMPDIR:-/tmp}/archeage-python-check.XXXXXX" 2>/dev/null) || {
+    venv_probe=$(make_probe_directory archeage-python-check 2>/dev/null) || {
         mark_install_missing 'Python pefile, or a writable temporary directory for venv/pip capability'
         return
     }
@@ -103,7 +109,7 @@ check_gnu_cp() {
         mark_install_missing 'GNU cp with --reflink=auto (the available cp is not GNU coreutils)'
         return
     fi
-    cp_probe=$(mktemp -d "${TMPDIR:-/tmp}/archeage-cp-check.XXXXXX" 2>/dev/null) || {
+    cp_probe=$(make_probe_directory archeage-cp-check 2>/dev/null) || {
         mark_install_missing 'GNU cp --reflink=auto (temporary test directory unavailable)'
         return
     }
@@ -128,7 +134,7 @@ check_sha256() {
         mark_install_missing 'GNU sha256sum (the available command is not GNU coreutils)'
         return
     fi
-    sha_probe=$(mktemp -d "${TMPDIR:-/tmp}/archeage-sha-check.XXXXXX" 2>/dev/null) || {
+    sha_probe=$(make_probe_directory archeage-sha-check 2>/dev/null) || {
         mark_install_missing 'sha256sum test capability'
         return
     }
@@ -230,7 +236,7 @@ check_build_group() {
         fi
     done
     if [ "$BUILD_MISSING" -eq 0 ]; then
-        build_probe=$(mktemp -d "${TMPDIR:-/tmp}/archeage-build-check.XXXXXX" 2>/dev/null) || {
+        build_probe=$(make_probe_directory archeage-build-check 2>/dev/null) || {
             mark_build_missing 'temporary directory for Windows compile/import-library/link smoke test'
         }
         if [ "$BUILD_MISSING" -eq 0 ]; then

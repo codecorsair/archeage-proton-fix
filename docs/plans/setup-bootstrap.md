@@ -2,8 +2,8 @@
 
 ## Status
 - Status: active
-- Current phase: implementation integrated and focused checks passed; ready for independent review.
-- Next safe action: pin code/docs, inspect real-download terminal result, and obtain read-only review.
+- Current phase: relative-TMPDIR regression fixed and tested; fresh independent review required.
+- Next safe action: pin corrected code and request a separate read-only reviewer with no script/test execution.
 
 ## Request and scope
 - Request: document build tools, check build and install dependencies across major Linux families, and provide a standalone shell script that downloads the repo/assets and starts guided installation.
@@ -44,11 +44,12 @@
 | Surface | Command and cwd | Tested state/environment | Exit code | Outcome or reuse rationale |
 | --- | --- | --- | --- | --- |
 | Preflight | Git fetch/status/rebase | clean worktree at bda9637 | 0 | no omitted changes |
-| Suite | KERNEL32_DLL=original-Wine-DLL python3 -m unittest -v; repeated with -O | 28 tests, controlled command/OS fixtures and existing real-Wine preservation tests | 0 | all pass; package execution uses fake sudo only |
+| Suite | KERNEL32_DLL=original-Wine-DLL python3 -m unittest -v | 29 tests, controlled command/OS fixtures and existing real-Wine preservation tests | 0 | all pass; package execution uses fake sudo only; previous 28-test state also passed -O |
+| Relative TMPDIR regression | isolated copied source/checker run from another cwd with relative TMPDIR | all generated files contained in TemporaryDirectory fixtures | 1 then 0 | failed before fix, passed after canonicalizing probe parent paths; source checkout not written and caller sentinel preserved |
 | Shell syntax/capabilities | sh -n setup.sh; sh setup.sh --check --install; sh setup.sh --check --build | CachyOS /bin/sh is Bash; installed LLVM 23.1.4 | 0 | groups pass; real source/standalone Windows smoke exercised |
 | Artifact integrity | sha256sum -c SHA256SUMS | original packaged binaries unchanged | 0 | both pass |
 | Safety regressions | native distro selection, newline TMPDIR cleanup, early collision, approved/declined commands | temporary fixtures only | 0 | foreign managers not chosen; unrelated files preserved; no actual package manager or sudo runs |
-| Real download | setup-real-download background task | genuine GitHub archive; Python wrapper permits only install.py --help at handoff | pending | inspect terminal callback before completion |
+| Real download | setup-real-download background task | genuine GitHub archive; Python wrapper permits only install.py --help at handoff | 0 | terminal result inspected: real artifacts verified and E2E_HANDOFF_HELP_ONLY confirmed; no installation or game changes |
 
 ## Review
 - Base and product HEAD: pending
@@ -56,12 +57,12 @@
 - Commit list: pending
 - Exact diff command: pending
 - SHA-256: pending
-- Mutator identities: parent and setup-worker. Parent integration tightened native distro selection, single-active-scratch cleanup, fail-closed UID lookup, early destination refusal, and group-specific manual hints after worker termination.
-- Reviewer identity and digest confirmation: pending
-- Standards verdict: pending
-- Specification verdict: pending
-- Findings and targeted follow-up: pending
-- Before/after reviewer Git evidence: pending
+- Mutator identities: parent and setup-worker. Parent integration tightened native distro selection, single-active-scratch cleanup, fail-closed UID lookup, early destination refusal, and group-specific manual hints after worker termination. setup-review also generated untracked probe artifacts and is excluded from all subsequent review of this diff.
+- Reviewer identity and digest confirmation: setup-review confirmed initial 6ae77b3 fingerprint but its run is invalidated; a fresh reviewer is required.
+- Standards verdict: no valid verdict yet.
+- Specification verdict: no valid verdict yet.
+- Findings and targeted follow-up: reviewer executed an ad hoc relative-TMPDIR probe and created untracked relative-tmp build output. Parent inspected all files, proved DLL/probe match generated binaries, and preserved them under ignored build/review-evidence/relative-tmp. Relative scratch paths changed meaning when the build script changed directory. Parent reproduced this only in an isolated copied-source fixture, then fixed all probe creation through an absolute-parent helper; regression is now green.
+- Before/after reviewer Git evidence: initial clean6ae77b3; afterward only untracked generated directory. Parent preservation restored clean tracked/untracked Git state; no original work discarded.
 
 ## Integration and rollback
 - Synchronization and re-verification: fetch/rebase before final verification as needed.
@@ -73,4 +74,4 @@
 ## Checkpoints and blockers
 - Latest saved checkpoint and last committed checkpoint: initial plan, base bda9637.
 - Blockers: none.
-- Exact next safe action: pin package and request independent review; inspect real-download result; perform final checks and authorized GitHub update after approval.
+- Exact next safe action: fresh independent read-only review of corrected product, final full checks, synchronization, integration and publication.
