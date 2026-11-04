@@ -1,9 +1,9 @@
 # Publishable package workflow record
 
 ## Status
-- Status: active
-- Current phase: final verification and independent review passed; ready for authorized publication.
-- Next safe action: integrate locally, create public GitHub repository with gh, push and verify remote identity.
+- Status: complete
+- Current phase: published and verified public GitHub repository.
+- Next safe action: use the beginner README to share the guided installation; future changes require normal review.
 
 ## Request and scope
 - Request: prepare a local Git repository containing code, DLL, and replication instructions for user-managed GitHub publication.
@@ -11,10 +11,10 @@
 - Out of scope: redistribution of Wine/game/anti-cheat binaries, changing the active game installation/session.
 
 ## Git identity
-- Source branch: main, clean new repository, no remotes.
+- Source branch: main; origin https://github.com/codecorsair/archeage-proton-fix.git.
 - Base commit: f6bc328.
-- Feature branch: feature/package.
-- Worktree: .worktrees/package.
+- Feature branch: feature/package was integrated and removed.
+- Worktree: .worktrees/package was clean, reachable from main, and removed.
 - Omitted source changes: none; import only six original code/build/test files, not local investigation history or records.
 
 ## Acceptance criteria
@@ -62,13 +62,16 @@
 - Before/after reviewer Git evidence: final review clean, unchanged HEAD/tree. Post-review final suite repeated normal/-O, source build matched bin/, artifact/private-material/whitespace checks passed.
 
 ## Integration and rollback
-- Synchronization and re-verification: new repository, no remotes.
-- Fast-forward result: pending
-- Product and evidence commits: pending
-- Reachability and cleanup: preserve imported original repository separately; remove only clean integrated package worktree.
+- Synchronization and re-verification: new repository; final source checks passed before authorized publication.
+- Fast-forward result: main fast-forwarded to dbe29d2 after reviewed product 73589df and evidence update.
+- Product and evidence commits: 5876b53 package, 73589df fixes, dbe29d2 review/verification evidence; completion update is record-only.
+- Reachability and cleanup: all package commits reachable from main; clean feature worktree and branch removed. Original local workaround and active game preserved.
+- Publication: gh created and pushed public codecorsair/archeage-proton-fix. GitHub reports MIT and default branch main; remote main initially matched dbe29d24f65333405fd4f70f229d061993b60471.
+- Remote artifacts: GitHub bin/tzcompat.dll blob f26cfe347bb08d2d7f8cae56305a6c13745b6239, 3072 bytes, matches local. README blob 7bdd15958c11e2e7ccf0fa6ea83522ab9fd43bf2 also matches local. Both SHA256SUMS entries pass after integration.
+- Presentation: complete README opened successfully in native artifact viewer.
 - Rollback strategy: original local workaround and running game untouched; public instructions select original Proton and remove only newly added shim if desired.
 
 ## Checkpoints and blockers
-- Latest saved checkpoint and last committed checkpoint: initial plan; empty base commit f6bc328.
+- Latest saved checkpoint and last committed checkpoint: published dbe29d2 with final reviewed code; this record-only completion checkpoint follows.
 - Blockers: none.
-- Exact next safe action: integrate the reviewed product and evidence-only record, then create/push public repository with gh and verify remote branch and binaries.
+- Exact next safe action: push this evidence-only completion record, confirm remote main equals local main, and report the public URL.
