@@ -2,8 +2,8 @@
 
 ## Status
 - Status: active
-- Current phase: implementation complete; native package verification and independent review next.
-- Next safe action: pin package commit and obtain independent review before publication.
+- Current phase: final verification and independent review passed; ready for authorized publication.
+- Next safe action: integrate locally, create public GitHub repository with gh, push and verify remote identity.
 
 ## Request and scope
 - Request: prepare a local Git repository containing code, DLL, and replication instructions for user-managed GitHub publication.
@@ -22,7 +22,7 @@
 - [x] Included shim/probe binaries build from supplied source with matching checksums and match across two fresh builds.
 - [x] Build/test instructions accept user-provided paths; installer stages and patches only a private runtime.
 - [x] Beginner README and advanced instructions cover guided/manual setup, source route, native verification, rollback, architecture limits, and anti-cheat risk.
-- [ ] Focused and final checks pass; independent read-only review approves the pinned package.
+- [x] Focused and post-review final checks pass; independent read-only review approves the final pinned package.
 
 ## Approved implementation plan and gates
 - Plan/specification source: user request and structured answers.
@@ -49,17 +49,17 @@
 | Dependency source | OpenSrc pypi:pefile@2024.8.26 | shared OpenSrc cache | 0 | exact source cached and canonical path verified |
 
 ## Review
-- Base and product HEAD: f6bc328 to initial product 5876b53; remediation follows.
-- Clean status and tree hash: initial review confirmed clean 5876b53 / ecc9ccc.
-- Commit list: initial package plus focused review fixes.
-- Exact diff command: git diff --binary --full-index --find-renames f6bc328...PRODUCT --
-- SHA-256: initial ca49c38d937ff72b0e7f64bb837a15cb76af33d016958ef130ac788297717d90; refresh for remediation.
+- Base and product HEAD: f6bc328 to 73589df8f6e345c0285d60e9c8ba958d48406703.
+- Clean status and tree hash: clean; e9eb428003fe55cf7b0ae99c26817279e132e11c.
+- Commit list: 5876b53 initial package; 73589df focused review fixes.
+- Exact diff command: git diff --binary --full-index --find-renames f6bc328...73589df8f6e345c0285d60e9c8ba958d48406703 --
+- SHA-256: 0cffe36b1f432ce66f0ea2fa8bf5b128aedfb41564180d75c58f59a6f74e368e.
 - Mutator identities: parent only
-- Reviewer identity and digest confirmation: publish-review, reviewer profile, confirmed initial digest and unchanged Git state.
-- Standards verdict: initial changes requested; follow-up pending.
-- Specification verdict: initial changes requested; follow-up pending.
+- Reviewer identity and digest confirmation: publish-review, reviewer profile, confirmed final fingerprint and unchanged Git state.
+- Standards verdict: approved after targeted follow-up.
+- Specification verdict: approved after targeted follow-up.
 - Findings and targeted follow-up: corrected truncated game process name and added command-line detection for Unreal's GameThread rename; replaced executable-realpath venv check with sys.prefix. New regression tests failed before fixes and pass afterward.
-- Before/after reviewer Git evidence: initial clean, unchanged HEAD/tree; refresh for follow-up.
+- Before/after reviewer Git evidence: final review clean, unchanged HEAD/tree. Post-review final suite repeated normal/-O, source build matched bin/, artifact/private-material/whitespace checks passed.
 
 ## Integration and rollback
 - Synchronization and re-verification: new repository, no remotes.
@@ -71,4 +71,4 @@
 ## Checkpoints and blockers
 - Latest saved checkpoint and last committed checkpoint: initial plan; empty base commit f6bc328.
 - Blockers: none.
-- Exact next safe action: independent review of pinned package; inspect native-probe and source-cache terminal results, then final checks and authorized publication.
+- Exact next safe action: integrate the reviewed product and evidence-only record, then create/push public repository with gh and verify remote branch and binaries.
