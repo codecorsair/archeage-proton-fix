@@ -4,7 +4,11 @@ For Linux players getting this Steam launch error:
 
 > The procedure entry point SystemTimeToTzSpecificLocalTimeEx could not be located in the dynamic link library KERNEL32.dll.
 
-Uses a **private copy of Proton** without replacing shared Proton or patching the game or anti-cheat. Setup uses the included DLL; no compiler is needed.
+![Launch error saying SystemTimeToTzSpecificLocalTimeEx could not be located in KERNEL32.dll](docs/images/entry-point-error.png)
+
+Proton lets Windows games run on Linux. In the tested version, a Windows function for converting times between time zones is missing where the game expects to find it, blocking startup. This fix supplies that function using Proton's existing time-zone support.
+
+It uses a **private copy of Proton** without replacing shared Proton or patching the game or anti-cheat. Setup uses the included DLL; no compiler is needed. [Read how the fix works in plain language](docs/how-it-works.md).
 
 **Experimental:** Linux x86-64 with native Steam only. Flatpak is unsupported. Tested on CachyOS; other setups are unverified. There is no guarantee of anti-cheat acceptance or account safety.
 
