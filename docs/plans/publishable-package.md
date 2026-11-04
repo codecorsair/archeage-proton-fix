@@ -42,22 +42,24 @@
 | Existing behavior | prior isolated runtime probe and actual game launch | original locally reviewed shim | 0 | user confirmed in-game; packaged C behavior retained |
 | C builds | bash build.sh build/repro-a; bash build.sh build/repro-b; cmp outputs | Clang/LLD 23.1.4, zero linker timestamp | 0 | byte-identical shim/probe; copied into bin/ |
 | Artifact integrity | sha256sum -c SHA256SUMS | packaged bin/ | 0 | both match |
-| Focused suite | KERNEL32_DLL=unmodified-Wine-kernel32 python3 -m unittest -v | 10 tests, temporary fixtures with actual Wine DLL | 0 | backups, refusals, failure cleanup, dry-run, process guard, PE preservation pass |
+| Focused suite | KERNEL32_DLL=unmodified-Wine-kernel32 python3 -m unittest -v; repeated with -O | 11 tests, temporary fixtures with actual Wine DLL | 0 | backups, refusals, failure cleanup, dry-run, correct truncated/renamed game process detection, helper bootstrap, PE preservation pass |
 | Terminal validation | PTY confirmation tests, 80x24 and 60x24 | plain prompts, real child process, cancelled before mutation | 0 | default-no prompt visible, no ANSI controls, cancellation makes no installation changes |
-| Native package probe | background task publish-native-probe | separate copied test prefix, never active game prefix | pending | inspect before completion |
+| Native package probe | background task publish-native-probe | separate copied test prefix, never active game prefix | 0 | terminal result inspected; packaged shim/probe passed |
+| Full installer | background task publish-full-installer | full copied CachyOS runtime and test prefix; idle guard mocked only for isolated fixture | 0 | complete installer and resulting runtime API probe passed; active game untouched |
+| Dependency source | OpenSrc pypi:pefile@2024.8.26 | shared OpenSrc cache | 0 | exact source cached and canonical path verified |
 
 ## Review
-- Base and product HEAD: pending
-- Clean status and tree hash: pending
-- Commit list: pending
-- Exact diff command: pending
-- SHA-256: pending
+- Base and product HEAD: f6bc328 to initial product 5876b53; remediation follows.
+- Clean status and tree hash: initial review confirmed clean 5876b53 / ecc9ccc.
+- Commit list: initial package plus focused review fixes.
+- Exact diff command: git diff --binary --full-index --find-renames f6bc328...PRODUCT --
+- SHA-256: initial ca49c38d937ff72b0e7f64bb837a15cb76af33d016958ef130ac788297717d90; refresh for remediation.
 - Mutator identities: parent only
-- Reviewer identity and digest confirmation: pending
-- Standards verdict: pending
-- Specification verdict: pending
-- Findings and targeted follow-up: pending
-- Before/after reviewer Git evidence: pending
+- Reviewer identity and digest confirmation: publish-review, reviewer profile, confirmed initial digest and unchanged Git state.
+- Standards verdict: initial changes requested; follow-up pending.
+- Specification verdict: initial changes requested; follow-up pending.
+- Findings and targeted follow-up: corrected truncated game process name and added command-line detection for Unreal's GameThread rename; replaced executable-realpath venv check with sys.prefix. New regression tests failed before fixes and pass afterward.
+- Before/after reviewer Git evidence: initial clean, unchanged HEAD/tree; refresh for follow-up.
 
 ## Integration and rollback
 - Synchronization and re-verification: new repository, no remotes.

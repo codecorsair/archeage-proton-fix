@@ -159,13 +159,34 @@ class InstallTests(unittest.TestCase):
                         process.wait()
                     os.close(master)
 
-    def test_running_steam_refused(self):
+    def test_running_steam_or_game_refused(self):
         proc = self.root / 'proc'
         (proc / '123').mkdir(parents=True)
-        (proc / '123/comm').write_text('steam\n')
-        with patch('install.Path', return_value=proc):
-            with self.assertRaisesRegex(ValueError, 'Fully exit'):
-                install.require_idle()
+        cases = [
+            ('steam', b'steam\0'),
+            ('ArcheAgeChronic', b'./ArcheAgeChronicles.exe\0'),
+            ('GameThread', b'Z:\\games\\ArcheAge Chronicles\\X5\\Binaries\\Win64\\ArcheAgeChronicles.exe\0X5\0'),
+        ]
+        for name, command in cases:
+            with self.subTest(process=name):
+                (proc / '123/comm').write_text(name + '\n')
+                (proc / '123/cmdline').write_bytes(command)
+                with patch('install.Path', return_value=proc):
+                    with self.assertRaisesRegex(ValueError, 'Fully exit'):
+                        install.require_idle()
+
+    def test_existing_venv_missing_helper_can_bootstrap(self):
+        environment = self.root / '.venv'
+        (environment / 'bin').mkdir(parents=True)
+        (environment / 'bin/python').symlink_to(sys.executable)
+        with patch('install.ROOT', self.root), patch('install.importlib.util.find_spec', return_value=None), \
+                patch('install.subprocess.run') as run, patch('install.os.execv', side_effect=RuntimeError('reexec requested')) as execute, \
+                contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaisesRegex(RuntimeError, 'reexec requested'):
+                install.ensure_dependency(self.steam, self.library, self.proton)
+        self.assertEqual(run.call_count, 2)
+        self.assertEqual(execute.call_args.args[0], str(environment / 'bin/python'))
+        self.assertIn('--yes', execute.call_args.args[1])
 
 
 if __name__ == '__main__':

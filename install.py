@@ -75,9 +75,15 @@ def require_idle():
             if process.stat().st_uid != os.getuid():
                 continue
             name = (process / 'comm').read_text().strip().lower()
+            busy = name in {'steam', 'steamwebhelper', 'archeagechronic'}
+            if not busy:
+                # Unreal can rename the main thread to GameThread; comm alone is insufficient.
+                arguments = (process / 'cmdline').read_bytes().split(b'\0')
+                busy = any(arg.replace(b'\\', b'/').rsplit(b'/', 1)[-1].lower() == b'archeagechronicles.exe'
+                           for arg in arguments)
         except (FileNotFoundError, PermissionError, ProcessLookupError):
             continue
-        if name in {'steam', 'steamwebhelper', 'archeagechronicl'}:
+        if busy:
             raise ValueError('Fully exit the game and Steam (Steam menu > Exit), then run this again.')
 
 
@@ -109,7 +115,7 @@ def ensure_dependency(steam, library, proton):
         return
     environment = ROOT / '.venv'
     python = environment / 'bin/python'
-    if python.resolve() == Path(sys.executable).resolve():
+    if Path(sys.prefix).resolve() == environment.resolve():
         raise ValueError('pefile is missing from .venv. Run .venv/bin/python -m pip install -r requirements.txt')
     print('Preparing a local Python helper in .venv (one PyPI download).', file=sys.stderr)
     subprocess.run([sys.executable, '-m', 'venv', str(environment)], check=True)
