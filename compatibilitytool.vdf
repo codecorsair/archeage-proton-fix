@@ -1,0 +1,13 @@
+"compatibilitytools"
+{
+  "compat_tools"
+  {
+    "proton-archeage-tz-fix"
+    {
+      "install_path" "."
+      "display_name" "Proton ArcheAge TZ Fix (experimental)"
+      "from_oslist" "windows"
+      "to_oslist" "linux"
+    }
+  }
+}
